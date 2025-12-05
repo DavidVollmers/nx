@@ -1,0 +1,20 @@
+{
+  "name": "nx",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^20.2.0",
+    "@commitlint/config-conventional": "^20.2.0",
+    "@commitlint/config-nx-scopes": "^20.2.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.7",
+    "prettier": "^3.7.4"
+  },
+  "lint-staged": {
+    "*.*": "prettier --write"
+  }
+}
