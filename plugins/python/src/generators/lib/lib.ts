@@ -1,4 +1,10 @@
-import { generateFiles, readJson, runTasksInSerial, Tree } from '@nx/devkit';
+import {
+  generateFiles,
+  OverwriteStrategy,
+  readJson,
+  runTasksInSerial,
+  Tree,
+} from '@nx/devkit';
 import { LibGeneratorSchema } from './schema';
 import { determineProjectNameAndRootOptions } from '../../utils/project-name-and-root-utils';
 import { ProjectNameAndRootOptions } from '@nx/devkit/src/generators/project-name-and-root-utils';
@@ -15,10 +21,18 @@ function createFiles(
 ) {
   const serializedClassifier = JSON.stringify(privateClassifier);
   const rootPackageJson = readJson(tree, 'package.json');
-  generateFiles(tree, join(__dirname, 'files/pyproject/root'), '.', {
-    name: rootPackageJson.name,
-    classifiers: serializedClassifier,
-  });
+  generateFiles(
+    tree,
+    join(__dirname, 'files/pyproject/root'),
+    '.',
+    {
+      name: rootPackageJson.name,
+      classifiers: serializedClassifier,
+    },
+    {
+      overwriteStrategy: OverwriteStrategy.KeepExisting,
+    },
+  );
   generateFiles(
     tree,
     join(__dirname, 'files/pyproject/lib'),
@@ -28,17 +42,24 @@ function createFiles(
       description: 'My awesome Python library',
       classifiers: !publishable ? serializedClassifier : '',
     },
+    {
+      overwriteStrategy: OverwriteStrategy.ThrowIfExisting,
+    },
   );
   updateToml(tree, 'pyproject.toml', (toml) => {
     if (!toml.project.dependencies) toml.dependencies = [];
-    toml.project.dependencies.push(options.projectName);
+    if (!toml.project.dependencies.includes(options.projectName)) {
+      toml.project.dependencies.push(options.projectName);
+    }
     if (!toml.tool) toml.tool = {};
     const tool = toml.tool;
     if (!tool.uv) tool.uv = {};
     const uv = tool.uv;
     if (!uv.workspace) uv.workspace = {};
     if (!uv.workspace.members) uv.workspace.members = [];
-    uv.workspace.members.push(options.projectRoot);
+    if (!uv.workspace.members.includes(options.projectRoot)) {
+      uv.workspace.members.push(options.projectRoot);
+    }
     if (!uv.sources) uv.sources = {};
     if (!uv.sources[options.projectName]) uv.sources[options.projectName] = {};
     uv.sources[options.projectName].workspace = true;
