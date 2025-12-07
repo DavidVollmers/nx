@@ -2,9 +2,11 @@ node_modules
 libs
 pyproject.toml
 !plugins/python/**/pyproject.toml
+uv.lock
+.venv
 
 .nx/cache
 .nx/workspace-data
 .cursor/rules/nx-rules.mdc
 .github/instructions/nx.instructions.md
-vitest.config.*.timestamp*
+vitest.config.*.timestamp* 

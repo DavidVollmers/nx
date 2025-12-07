@@ -1,9 +1,10 @@
-import { generateFiles, Tree } from '@nx/devkit';
+import { generateFiles, readJson, runTasksInSerial, Tree } from '@nx/devkit';
 import { LibGeneratorSchema } from './schema';
 import { determineProjectNameAndRootOptions } from '../../utils/project-name-and-root-utils';
 import { ProjectNameAndRootOptions } from '@nx/devkit/src/generators/project-name-and-root-utils';
 import { join } from 'path';
 import { updateToml } from '../../utils/toml';
+import { sync } from '../../utils/uv';
 
 const privateClassifier = 'Private :: Do Not Upload';
 
@@ -13,8 +14,9 @@ function createFiles(
   publishable: boolean,
 ) {
   const serializedClassifier = JSON.stringify(privateClassifier);
+  const rootPackageJson = readJson(tree, 'package.json');
   generateFiles(tree, join(__dirname, 'files/pyproject/root'), '.', {
-    name: options.projectName,
+    name: rootPackageJson.name,
     classifiers: serializedClassifier,
   });
   generateFiles(
@@ -52,6 +54,13 @@ export async function libGenerator(tree: Tree, options: LibGeneratorSchema) {
     importPath: options.importPath,
   });
   createFiles(tree, result, !!options.publishable);
+  // TODO handle dry run properly (https://github.com/nrwl/nx/discussions/33731)
+  const dryRun =
+    process.argv.includes('--dryRun') || process.argv.includes('-d');
+  const tasks = [];
+  if (!dryRun) tasks.push(() => sync(tree));
+  if (tasks.length === 0) return;
+  return runTasksInSerial(...tasks);
 }
 
 export default libGenerator;
