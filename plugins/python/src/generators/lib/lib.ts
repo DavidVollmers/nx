@@ -3,6 +3,7 @@ import { LibGeneratorSchema } from './schema';
 import { determineProjectNameAndRootOptions } from '../../utils/project-name-and-root-utils';
 import { ProjectNameAndRootOptions } from '@nx/devkit/src/generators/project-name-and-root-utils';
 import { join } from 'path';
+import { updateToml } from '../../utils/toml';
 
 const privateClassifier = 'Private :: Do Not Upload';
 
@@ -26,6 +27,12 @@ function createFiles(
       classifiers: !publishable ? serializedClassifier : '',
     },
   );
+  updateToml(tree, 'pyproject.toml', (pyproject) => {
+    if (!pyproject.dependencies) pyproject.dependencies = [];
+    pyproject.dependencies.push(options.projectName);
+    console.log(pyproject);
+    return pyproject;
+  });
 }
 
 export async function libGenerator(tree: Tree, options: LibGeneratorSchema) {
