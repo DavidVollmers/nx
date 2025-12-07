@@ -4,11 +4,18 @@ import { determineProjectNameAndRootOptions } from '../../utils/project-name-and
 import { ProjectNameAndRootOptions } from '@nx/devkit/src/generators/project-name-and-root-utils';
 import { join } from 'path';
 
+const privateClassifier = 'Private :: Do Not Upload';
+
 function createFiles(
   tree: Tree,
   options: ProjectNameAndRootOptions,
   publishable: boolean,
 ) {
+  const serializedClassifier = JSON.stringify(privateClassifier);
+  generateFiles(tree, join(__dirname, 'files/pyproject/root'), '.', {
+    name: options.projectName,
+    classifiers: serializedClassifier,
+  });
   generateFiles(
     tree,
     join(__dirname, 'files/pyproject/lib'),
@@ -16,7 +23,7 @@ function createFiles(
     {
       name: options.projectName,
       description: 'My awesome Python library',
-      classifiers: !publishable ? '"Private :: Do Not Upload"' : '',
+      classifiers: !publishable ? serializedClassifier : '',
     },
   );
 }

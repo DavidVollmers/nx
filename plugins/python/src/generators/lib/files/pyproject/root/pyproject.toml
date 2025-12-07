@@ -1,0 +1,11 @@
+[project]
+name = "<%= name %>"
+version = "0.0.0"
+classifiers = [<%- classifiers %>]<% } %>
+requires-python = ">=3.13"
+dependencies = []
+
+[tool.uv.workspace]
+members = []
+
+[tool.uv.sources]
