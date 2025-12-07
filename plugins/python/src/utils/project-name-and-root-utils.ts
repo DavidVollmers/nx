@@ -78,8 +78,7 @@ export async function determineProjectNameAndRootOptions(
     );
   }
 
-  // TODO resolve import path?
-  const importPath = options.importPath;
+  const importPath = options.importPath ?? name;
 
   return {
     projectName: name,
