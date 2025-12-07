@@ -1,6 +1,7 @@
 node_modules
 libs
-
+pyproject.toml
+!plugins/python/**/pyproject.toml
 
 .nx/cache
 .nx/workspace-data

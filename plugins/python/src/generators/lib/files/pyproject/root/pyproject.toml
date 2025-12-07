@@ -1,6 +1,6 @@
 [project]
 name = "<%= name %>"
-version = "0.0.0"
+version = "0.0.0"<% if (classifiers.length) { %>
 classifiers = [<%- classifiers %>]<% } %>
 requires-python = ">=3.13"
 dependencies = []

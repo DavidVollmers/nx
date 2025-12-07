@@ -27,11 +27,20 @@ function createFiles(
       classifiers: !publishable ? serializedClassifier : '',
     },
   );
-  updateToml(tree, 'pyproject.toml', (pyproject) => {
-    if (!pyproject.dependencies) pyproject.dependencies = [];
-    pyproject.dependencies.push(options.projectName);
-    console.log(pyproject);
-    return pyproject;
+  updateToml(tree, 'pyproject.toml', (toml) => {
+    if (!toml.project.dependencies) toml.dependencies = [];
+    toml.project.dependencies.push(options.projectName);
+    if (!toml.tool) toml.tool = {};
+    const tool = toml.tool;
+    if (!tool.uv) tool.uv = {};
+    const uv = tool.uv;
+    if (!uv.workspace) uv.workspace = {};
+    if (!uv.workspace.members) uv.workspace.members = [];
+    uv.workspace.members.push(options.projectRoot);
+    if (!uv.sources) uv.sources = {};
+    if (!uv.sources[options.projectName]) uv.sources[options.projectName] = {};
+    uv.sources[options.projectName].workspace = true;
+    return toml;
   });
 }
 
