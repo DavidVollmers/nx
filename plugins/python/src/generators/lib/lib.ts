@@ -1,6 +1,8 @@
 import {
+  addProjectConfiguration,
   generateFiles,
   OverwriteStrategy,
+  ProjectConfiguration,
   readJson,
   runTasksInSerial,
   Tree,
@@ -11,6 +13,7 @@ import { ProjectNameAndRootOptions } from '@nx/devkit/src/generators/project-nam
 import { join } from 'path';
 import { updateToml } from '../../utils/toml';
 import { sync } from '../../utils/uv';
+import { normalizeLinterOption } from '../../utils/generator-prompts';
 
 const privateClassifier = 'Private :: Do Not Upload';
 
@@ -74,12 +77,27 @@ export async function libGenerator(tree: Tree, options: LibGeneratorSchema) {
     directory: options.directory,
     importPath: options.importPath,
   });
+  const linter = await normalizeLinterOption(tree, options.linter);
+
   createFiles(tree, result, !!options.publishable);
+
   // TODO handle dry run properly (https://github.com/nrwl/nx/discussions/33731)
   const dryRun =
     process.argv.includes('--dryRun') || process.argv.includes('-d');
   const tasks = [];
   if (!dryRun) tasks.push(() => sync(tree));
+
+  // TODO add linter dependency & target
+
+  const projectConfiguration: ProjectConfiguration = {
+    root: result.projectRoot,
+    projectType: 'library',
+    targets: {},
+    tags: [],
+  };
+
+  addProjectConfiguration(tree, result.projectName, projectConfiguration);
+
   if (tasks.length === 0) return;
   return runTasksInSerial(...tasks);
 }

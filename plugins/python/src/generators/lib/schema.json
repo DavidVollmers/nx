@@ -18,6 +18,12 @@
       "description": "Library name.",
       "x-priority": "important"
     },
+    "linter": {
+      "description": "The tool to use for running lint checks.",
+      "type": "string",
+      "enum": ["none", "flake8"],
+      "x-priority": "important"
+    },
     "publishable": {
       "type": "boolean",
       "default": false,
