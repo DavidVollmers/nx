@@ -10,9 +10,7 @@ import {
 } from '@nx/devkit';
 import { InitGeneratorSchema } from './schema';
 import { join } from 'path';
-import { PRIVATE_CLASSIFIER } from '../../constants';
-
-const pluginName = '@dev-tales/nx-python';
+import { PLUGIN_NAME, PRIVATE_CLASSIFIER } from '../../constants';
 
 function createFiles(tree: Tree) {
   const nxJson = readNxJson(tree);
@@ -20,10 +18,11 @@ function createFiles(tree: Tree) {
   if (
     !nxJson.plugins.some(
       (p) =>
-        p === pluginName || (typeof p !== 'string' && p.plugin === pluginName),
+        p === PLUGIN_NAME ||
+        (typeof p !== 'string' && p.plugin === PLUGIN_NAME),
     )
   ) {
-    nxJson.plugins.push(pluginName);
+    nxJson.plugins.push(PLUGIN_NAME);
     writeJson(tree, 'nx.json', nxJson);
   }
   updateNxJson(tree, nxJson);
