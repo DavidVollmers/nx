@@ -20,7 +20,7 @@ export async function normalizeLinterOption(
 
   if (tree.exists('pyproject.toml')) {
     const toml = readToml(tree, 'pyproject.toml');
-    return doesDependencyExist(toml, 'flake8') ? 'flake8' : 'none';
+    if (doesDependencyExist(toml, 'flake8')) return 'flake8';
   }
 
   return await promptWhenInteractive<{

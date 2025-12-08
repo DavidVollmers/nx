@@ -20,7 +20,7 @@ export function doesDependencyExist(
   if (!dependencyGroups) return false;
 
   for (const groupName in dependencyGroups) {
-    if (checkDependencies(dependencyGroups[groupName]?.dependencies, regex)) {
+    if (checkDependencies(dependencyGroups[groupName], regex)) {
       return true;
     }
   }

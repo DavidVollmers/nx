@@ -12,7 +12,7 @@ import { determineProjectNameAndRootOptions } from '../../utils/project-name-and
 import { ProjectNameAndRootOptions } from '@nx/devkit/src/generators/project-name-and-root-utils';
 import { join } from 'path';
 import { updateToml } from '../../utils/toml';
-import { sync } from '../../utils/uv';
+import { addDependency, sync } from '../../utils/uv';
 import { normalizeLinterOption } from '../../utils/generator-prompts';
 import initGenerator from '../init/init';
 import { PRIVATE_CLASSIFIER } from '../../constants';
@@ -76,7 +76,7 @@ export async function libGenerator(tree: Tree, options: LibGeneratorSchema) {
   const tasks = [];
   if (!dryRun) {
     if (linter && linter !== 'none') {
-      tasks.push(() => addDependency(tree, 'pyproject.toml', linter));
+      tasks.push(() => addDependency(tree, 'pyproject.toml', linter, 'dev'));
     }
     tasks.push(() => sync(tree));
   }
