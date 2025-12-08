@@ -74,9 +74,12 @@ export async function libGenerator(tree: Tree, options: LibGeneratorSchema) {
   const dryRun =
     process.argv.includes('--dryRun') || process.argv.includes('-d');
   const tasks = [];
-  if (!dryRun) tasks.push(() => sync(tree));
-
-  // TODO add linter dependency & target
+  if (!dryRun) {
+    if (linter && linter !== 'none') {
+      tasks.push(() => addDependency(tree, 'pyproject.toml', linter));
+    }
+    tasks.push(() => sync(tree));
+  }
 
   const projectConfiguration: ProjectConfiguration = {
     root: result.projectRoot,

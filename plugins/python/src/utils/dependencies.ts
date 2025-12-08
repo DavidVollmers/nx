@@ -1,26 +1,18 @@
-import { Tree } from '@nx/devkit';
-import { readToml } from './toml';
-
-function checkDependencies(scope: any, dependencyName: string): boolean {
+function checkDependencies(scope: any, regex: RegExp): boolean {
   if (!scope) {
     return false;
   }
 
-  const regex = new RegExp(`^${dependencyName}([\\s<>=!~].*)?$`, 'i');
   return scope.some((dep: string) => regex.test(dep));
 }
 
 export function doesDependencyExist(
-  tree: Tree,
-  pyprojectPath: string,
+  toml: any,
   dependencyName: string,
 ): boolean {
-  if (!tree.exists(pyprojectPath)) {
-    return false;
-  }
+  const regex = new RegExp(`^${dependencyName}([\\s<>=!~].*)?$`, 'i');
 
-  const toml = readToml(tree, pyprojectPath);
-  if (checkDependencies(toml.project?.dependencies, dependencyName)) {
+  if (checkDependencies(toml.project?.dependencies, regex)) {
     return true;
   }
 
@@ -28,12 +20,7 @@ export function doesDependencyExist(
   if (!dependencyGroups) return false;
 
   for (const groupName in dependencyGroups) {
-    if (
-      checkDependencies(
-        dependencyGroups[groupName]?.dependencies,
-        dependencyName,
-      )
-    ) {
+    if (checkDependencies(dependencyGroups[groupName]?.dependencies, regex)) {
       return true;
     }
   }

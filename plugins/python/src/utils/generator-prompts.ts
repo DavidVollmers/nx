@@ -2,6 +2,7 @@ import { Tree } from '@nx/devkit';
 import { doesDependencyExist } from './dependencies';
 import { promptWhenInteractive } from '@nx/devkit/src/generators/prompt';
 import { linters, Linter } from './linter';
+import { readToml } from './toml';
 
 const defaultLinter = 'none' as const;
 
@@ -18,9 +19,8 @@ export async function normalizeLinterOption(
   }
 
   if (tree.exists('pyproject.toml')) {
-    return doesDependencyExist(tree, 'pyproject.toml', 'flake8')
-      ? 'flake8'
-      : 'none';
+    const toml = readToml(tree, 'pyproject.toml');
+    return doesDependencyExist(toml, 'flake8') ? 'flake8' : 'none';
   }
 
   return await promptWhenInteractive<{
