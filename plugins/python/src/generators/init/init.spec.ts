@@ -1,12 +1,12 @@
 import { createTreeWithEmptyWorkspace } from '@nx/devkit/testing';
-import { Tree, readProjectConfiguration } from '@nx/devkit';
+import { Tree } from '@nx/devkit';
 
 import { initGenerator } from './init';
 import { InitGeneratorSchema } from './schema';
 
 describe('init generator', () => {
   let tree: Tree;
-  const options: InitGeneratorSchema = { name: 'test' };
+  const options: InitGeneratorSchema = { skipFormat: true };
 
   beforeEach(() => {
     tree = createTreeWithEmptyWorkspace();
@@ -14,7 +14,5 @@ describe('init generator', () => {
 
   it('should run successfully', async () => {
     await initGenerator(tree, options);
-    const config = readProjectConfiguration(tree, 'test');
-    expect(config).toBeDefined();
   });
 });

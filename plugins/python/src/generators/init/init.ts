@@ -10,6 +10,7 @@ import {
 } from '@nx/devkit';
 import { InitGeneratorSchema } from './schema';
 import { join } from 'path';
+import { PRIVATE_CLASSIFIER } from '../../constants';
 
 const pluginName = '@dev-tales/nx-python';
 

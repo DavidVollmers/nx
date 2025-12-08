@@ -1,1 +1,1 @@
-const PRIVATE_CLASSIFIER = 'Private :: Do Not Upload';
+export const PRIVATE_CLASSIFIER = 'Private :: Do Not Upload';

@@ -15,6 +15,7 @@ import { updateToml } from '../../utils/toml';
 import { sync } from '../../utils/uv';
 import { normalizeLinterOption } from '../../utils/generator-prompts';
 import initGenerator from '../init/init';
+import { PRIVATE_CLASSIFIER } from '../../constants';
 
 function createFiles(
   tree: Tree,
