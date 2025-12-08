@@ -35,6 +35,7 @@ function createFiles(tree: Tree) {
     {
       name: rootPackageJson.name,
       classifiers: JSON.stringify(PRIVATE_CLASSIFIER),
+      tmp: '',
     },
     {
       overwriteStrategy: OverwriteStrategy.KeepExisting,

@@ -30,6 +30,7 @@ function createFiles(
       name: options.projectName,
       description: 'My awesome Python library',
       classifiers: !publishable ? JSON.stringify(PRIVATE_CLASSIFIER) : '',
+      tmp: '',
     },
     {
       overwriteStrategy: OverwriteStrategy.ThrowIfExisting,
