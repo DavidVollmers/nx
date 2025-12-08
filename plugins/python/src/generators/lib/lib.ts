@@ -1,9 +1,9 @@
 import {
   addProjectConfiguration,
+  formatFiles,
   generateFiles,
   OverwriteStrategy,
   ProjectConfiguration,
-  readJson,
   runTasksInSerial,
   Tree,
 } from '@nx/devkit';
@@ -14,36 +14,21 @@ import { join } from 'path';
 import { updateToml } from '../../utils/toml';
 import { sync } from '../../utils/uv';
 import { normalizeLinterOption } from '../../utils/generator-prompts';
-
-const privateClassifier = 'Private :: Do Not Upload';
+import initGenerator from '../init/init';
 
 function createFiles(
   tree: Tree,
   options: ProjectNameAndRootOptions,
   publishable: boolean,
 ) {
-  const serializedClassifier = JSON.stringify(privateClassifier);
-  const rootPackageJson = readJson(tree, 'package.json');
   generateFiles(
     tree,
-    join(__dirname, 'files/pyproject/root'),
-    '.',
-    {
-      name: rootPackageJson.name,
-      classifiers: serializedClassifier,
-    },
-    {
-      overwriteStrategy: OverwriteStrategy.KeepExisting,
-    },
-  );
-  generateFiles(
-    tree,
-    join(__dirname, 'files/pyproject/lib'),
+    join(__dirname, 'files/pyproject'),
     options.projectRoot,
     {
       name: options.projectName,
       description: 'My awesome Python library',
-      classifiers: !publishable ? serializedClassifier : '',
+      classifiers: !publishable ? JSON.stringify(PRIVATE_CLASSIFIER) : '',
     },
     {
       overwriteStrategy: OverwriteStrategy.ThrowIfExisting,
@@ -71,6 +56,8 @@ function createFiles(
 }
 
 export async function libGenerator(tree: Tree, options: LibGeneratorSchema) {
+  await initGenerator(tree, { skipFormat: true });
+
   const result = await determineProjectNameAndRootOptions(tree, {
     name: options.name,
     projectType: 'library',
@@ -97,6 +84,8 @@ export async function libGenerator(tree: Tree, options: LibGeneratorSchema) {
   };
 
   addProjectConfiguration(tree, result.projectName, projectConfiguration);
+
+  await formatFiles(tree);
 
   if (tasks.length === 0) return;
   return runTasksInSerial(...tasks);

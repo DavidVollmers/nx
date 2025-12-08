@@ -15,7 +15,7 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "python": ["plugins/python/src/index.ts"]
+      "@dev-tales/nx-python": ["plugins/python/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]
