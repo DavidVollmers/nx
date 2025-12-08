@@ -19,5 +19,15 @@
       "cache": true,
       "inputs": ["default", "^default"]
     }
+  },
+  "release": {
+    "projects": ["plugins/*"],
+    "releaseTagPattern": "{version}",
+    "version": {
+      "conventionalCommits": true
+    },
+    "git": {
+      "commitMessage": "chore: release {version} [skip ci]"
+    }
   }
 }
