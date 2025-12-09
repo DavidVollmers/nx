@@ -1,8 +1,13 @@
 {
   "name": "@dev-tales/nx-python",
   "version": "0.1.0",
+  "description": "Nx Plugin for Python projects",
   "publishConfig": {
     "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/DavidVollmers/nx.git"
   },
   "type": "commonjs",
   "main": "./src/index.js",

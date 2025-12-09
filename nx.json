@@ -23,6 +23,7 @@
   "release": {
     "projects": ["plugins/*"],
     "releaseTagPattern": "{version}",
+    "projectsRelationship": "independent",
     "version": {
       "conventionalCommits": true
     },
