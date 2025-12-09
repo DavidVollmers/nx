@@ -11,6 +11,7 @@ import { readdirSync } from 'fs';
 
 export interface PythonPluginOptions {
   readonly lintTargetName?: string;
+  readonly testTargetName?: string;
 }
 
 export const createNodesV2: CreateNodesV2<PythonPluginOptions> = [
@@ -44,11 +45,23 @@ async function createNodesInternal(
     inputs: [joinPathFragments('{projectRoot}', '**', '*.py')],
   };
 
+  const testTargetName = options?.testTargetName ?? 'test';
+  const testTarget: TargetConfiguration = {
+    executor: `${PLUGIN_NAME}:test`,
+    cache: true,
+    inputs: [
+      joinPathFragments('{workspaceRoot}', 'pyproject.toml'),
+      joinPathFragments('{projectRoot}', 'pyproject.toml'),
+      joinPathFragments('{projectRoot}', '**', '*.py'),
+    ],
+  };
+
   return {
     projects: {
       [projectRoot]: {
         targets: {
           [lintTargetName]: lintTarget,
+          [testTargetName]: testTarget,
         },
       },
     },
