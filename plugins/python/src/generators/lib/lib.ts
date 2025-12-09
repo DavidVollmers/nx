@@ -16,12 +16,16 @@ import { addDependency, sync } from '../../utils/uv';
 import initGenerator from '../init/init';
 import { PRIVATE_CLASSIFIER } from '../../constants';
 import { normalizeLinterOption } from '../../utils/linter';
-import { normalizeUnitTestRunnerOption } from '../../utils/unit-test-runner';
+import {
+  normalizeUnitTestRunnerOption,
+  UnitTestRunner,
+} from '../../utils/unit-test-runner';
 
 function createFiles(
   tree: Tree,
   options: ProjectNameAndRootOptions,
   publishable: boolean,
+  unitTestRunner: UnitTestRunner,
 ) {
   generateFiles(
     tree,
@@ -38,6 +42,18 @@ function createFiles(
       overwriteStrategy: OverwriteStrategy.ThrowIfExisting,
     },
   );
+
+  if (unitTestRunner !== 'none') {
+    generateFiles(
+      tree,
+      join(__dirname, 'files/' + unitTestRunner),
+      options.projectRoot,
+      {
+        name: options.projectName,
+        module: options.importPath,
+      },
+    );
+  }
 
   updateToml(tree, 'pyproject.toml', (toml) => {
     if (!toml.project.dependencies) toml.dependencies = [];
@@ -75,7 +91,7 @@ export async function libGenerator(tree: Tree, options: LibGeneratorSchema) {
     options.unitTestRunner,
   );
 
-  createFiles(tree, result, !!options.publishable);
+  createFiles(tree, result, !!options.publishable, unitTestRunner);
 
   // TODO handle dry run properly (https://github.com/nrwl/nx/discussions/33731)
   const dryRun =

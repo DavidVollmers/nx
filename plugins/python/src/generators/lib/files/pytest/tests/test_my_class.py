@@ -1,9 +1,11 @@
 from <%= module %> import MyClass
 
+
 def test_default_initialization():
     my_instance = MyClass()
     assert my_instance.name == '<%= name %>'
     assert my_instance.greet() == 'Hello, <%= name %>!'
+
 
 def test_custom_initialization():
     custom_name = 'Alice'
