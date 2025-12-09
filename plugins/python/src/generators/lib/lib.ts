@@ -13,9 +13,10 @@ import { ProjectNameAndRootOptions } from '@nx/devkit/src/generators/project-nam
 import { join } from 'path';
 import { updateToml } from '../../utils/toml';
 import { addDependency, sync } from '../../utils/uv';
-import { normalizeLinterOption } from '../../utils/generator-prompts';
 import initGenerator from '../init/init';
 import { PRIVATE_CLASSIFIER } from '../../constants';
+import { normalizeLinterOption } from '../../utils/linter';
+import { normalizeUnitTestRunnerOption } from '../../utils/unit-test-runner';
 
 function createFiles(
   tree: Tree,
@@ -67,6 +68,10 @@ export async function libGenerator(tree: Tree, options: LibGeneratorSchema) {
     importPath: options.importPath,
   });
   const linter = await normalizeLinterOption(tree, options.linter);
+  const unitTestRunner = await normalizeUnitTestRunnerOption(
+    tree,
+    options.unitTestRunner,
+  );
 
   createFiles(tree, result, !!options.publishable);
 
@@ -77,6 +82,11 @@ export async function libGenerator(tree: Tree, options: LibGeneratorSchema) {
   if (!dryRun) {
     if (linter && linter !== 'none') {
       tasks.push(() => addDependency(tree, 'pyproject.toml', linter, 'dev'));
+    }
+    if (unitTestRunner && unitTestRunner !== 'none') {
+      tasks.push(() =>
+        addDependency(tree, 'pyproject.toml', unitTestRunner, 'dev'),
+      );
     }
     tasks.push(() => sync(tree));
   }

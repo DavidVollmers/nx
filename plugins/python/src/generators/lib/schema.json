@@ -24,6 +24,12 @@
       "enum": ["none", "flake8"],
       "x-priority": "important"
     },
+    "unitTestRunner": {
+      "description": "Test runner to use for unit tests.",
+      "type": "string",
+      "enum": ["none", "pytest"],
+      "x-priority": "important"
+    },
     "publishable": {
       "type": "boolean",
       "default": false,

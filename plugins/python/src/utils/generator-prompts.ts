@@ -1,38 +1,37 @@
 import { Tree } from '@nx/devkit';
+import { readToml } from './toml';
 import { doesDependencyExist } from './dependencies';
 import { promptWhenInteractive } from '@nx/devkit/src/generators/prompt';
-import { linters, Linter } from './linter';
-import { readToml } from './toml';
 
-const defaultLinter = 'none' as const;
-
-const linterChoices = linters.map((linter) => ({
-  name: linter,
-}));
-
-export async function normalizeLinterOption(
+export async function normalizeDependencyOption<T extends string>(
   tree: Tree,
-  linter: undefined | Linter,
-): Promise<Linter> {
-  if (linter) {
-    return linter;
+  name: string,
+  initialValue: T | undefined,
+  choices: readonly T[],
+  defaultValue: T,
+  message: string = `Which ${name} would you like to use?`,
+): Promise<T> {
+  if (initialValue) {
+    return initialValue;
   }
 
   if (tree.exists('pyproject.toml')) {
     const toml = readToml(tree, 'pyproject.toml');
-    if (doesDependencyExist(toml, 'flake8')) return 'flake8';
+    for (const choice of choices) {
+      if (doesDependencyExist(toml, choice)) return choice;
+    }
   }
 
   return await promptWhenInteractive<{
-    linter: Linter;
+    [name]: T;
   }>(
     {
       type: 'autocomplete',
-      name: 'linter',
-      message: `Which linter would you like to use?`,
-      choices: linterChoices,
+      name,
+      message,
+      choices: choices.map((c) => ({ name: c })),
       initial: 0,
     },
-    { linter: defaultLinter },
-  ).then(({ linter }) => linter);
+    { [name]: defaultValue },
+  ).then((v) => v[name]);
 }
