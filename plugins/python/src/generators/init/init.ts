@@ -11,6 +11,7 @@ import {
 import { InitGeneratorSchema } from './schema';
 import { join } from 'path';
 import { PLUGIN_NAME, PRIVATE_CLASSIFIER } from '../../constants';
+import { extendGitignore } from '../../utils/gitignore';
 
 function createFiles(tree: Tree) {
   const nxJson = readNxJson(tree);
@@ -41,6 +42,8 @@ function createFiles(tree: Tree) {
       overwriteStrategy: OverwriteStrategy.KeepExisting,
     },
   );
+
+  extendGitignore(tree, '.gitignore', ['.venv', '__pycache__', '*.egg-info']);
 }
 
 export async function initGenerator(tree: Tree, options: InitGeneratorSchema) {
