@@ -4,6 +4,11 @@
       "implementation": "./src/executors/lint/lint",
       "schema": "./src/executors/lint/schema.json",
       "description": "lint executor"
+    },
+    "test": {
+      "implementation": "./src/executors/test/test",
+      "schema": "./src/executors/test/schema.json",
+      "description": "test executor"
     }
   }
 }

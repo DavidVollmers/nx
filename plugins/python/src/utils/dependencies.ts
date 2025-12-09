@@ -1,3 +1,10 @@
+import { PromiseExecutor } from '@nx/devkit';
+import { join } from 'path';
+import { existsSync, readFileSync } from 'fs';
+import TOML from 'smol-toml';
+import { execSync, ExecSyncOptions } from 'child_process';
+import { DEFAULT_EXEC_OPTIONS } from '../constants';
+
 function checkDependencies(scope: any, regex: RegExp): boolean {
   if (!scope) {
     return false;
@@ -27,3 +34,62 @@ export function doesDependencyExist(
 
   return false;
 }
+
+export const dependencyExecutor: PromiseExecutor<{
+  dependencies: string[];
+  commands: {
+    [dependency: string]: string;
+  };
+}> = async (options, context) => {
+  const projectRoot =
+    context.projectsConfigurations.projects[context.projectName].root;
+
+  const projectTomlPath = join(context.root, 'pyproject.toml');
+  if (!existsSync(projectTomlPath)) {
+    console.error(`Error: No pyproject.toml found at ${projectTomlPath}.`);
+    return {
+      success: false,
+    };
+  }
+
+  const content = readFileSync(projectTomlPath, 'utf-8');
+  const toml = TOML.parse(content);
+
+  let foundDependency: string = null;
+  for (const dependency of options.dependencies) {
+    if (doesDependencyExist(toml, dependency)) {
+      foundDependency = dependency;
+      break;
+    }
+  }
+
+  if (!foundDependency) {
+    console.error(
+      `Error: None of the specified dependencies (${options.dependencies.join(', ')}) are listed in ${projectTomlPath}.`,
+    );
+    return {
+      success: false,
+    };
+  }
+
+  const execSyncOptions: ExecSyncOptions = {
+    ...DEFAULT_EXEC_OPTIONS,
+    cwd: join(context.root, projectRoot),
+  };
+
+  const command = 'uv run ' + options.commands[foundDependency];
+  try {
+    execSync(command, execSyncOptions);
+  } catch (error) {
+    if (!error.message.includes(command)) {
+      console.error('Error:', error.message);
+    }
+    return {
+      success: false,
+    };
+  }
+
+  return {
+    success: true,
+  };
+};

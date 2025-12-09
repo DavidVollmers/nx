@@ -1,13 +1,13 @@
 import { PromiseExecutor } from '@nx/devkit';
-import { LintExecutorSchema } from './schema';
+import { TestExecutorSchema } from './schema';
 import { dependencyExecutor } from '../../utils/dependencies';
 
-const runExecutor: PromiseExecutor<LintExecutorSchema> = (_, context) => {
+const runExecutor: PromiseExecutor<TestExecutorSchema> = async (_, context) => {
   return dependencyExecutor(
     {
-      dependencies: ['flake8'],
+      dependencies: ['pytest'],
       commands: {
-        flake8: 'flake8 . --color always',
+        pytest: 'pytest --color=yes',
       },
     },
     context,
