@@ -31,7 +31,7 @@ function createFiles(tree: Tree) {
   const rootPackageJson = readJson(tree, 'package.json');
   generateFiles(
     tree,
-    join(__dirname, 'files/pyproject'),
+    join(__dirname, 'files/root'),
     '.',
     {
       name: rootPackageJson.name,

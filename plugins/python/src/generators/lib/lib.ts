@@ -25,18 +25,20 @@ function createFiles(
 ) {
   generateFiles(
     tree,
-    join(__dirname, 'files/pyproject'),
+    join(__dirname, 'files/lib'),
     options.projectRoot,
     {
       name: options.projectName,
       description: 'My awesome Python library',
       classifiers: !publishable ? JSON.stringify(PRIVATE_CLASSIFIER) : '',
+      module: options.importPath,
       tmp: '',
     },
     {
       overwriteStrategy: OverwriteStrategy.ThrowIfExisting,
     },
   );
+
   updateToml(tree, 'pyproject.toml', (toml) => {
     if (!toml.project.dependencies) toml.dependencies = [];
     if (!toml.project.dependencies.includes(options.projectName)) {
