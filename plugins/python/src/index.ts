@@ -8,6 +8,7 @@ import { TargetConfiguration } from 'nx/src/config/workspace-json-project-json';
 import { joinPathFragments } from '@nx/devkit';
 import { PLUGIN_NAME } from './constants';
 import { readdirSync } from 'fs';
+import { CreateNodesResult } from 'nx/src/project-graph/plugins/public-api';
 
 export interface PythonPluginOptions {
   readonly lintTargetName?: string;
@@ -33,7 +34,7 @@ async function createNodesInternal(
   configFilePath: string,
   options: PythonPluginOptions | undefined,
   context: CreateNodesContextV2,
-) {
+): Promise<CreateNodesResult> {
   const projectRoot = dirname(configFilePath);
 
   // Do not create a project if package.json or project.json isn't there.
@@ -77,14 +78,23 @@ async function createNodesInternal(
     dependsOn: [`${buildTargetName}`],
   };
 
+  // TODO determine dependencies based on uv workspace configuration
+  const dependencies = [];
+
   return {
     projects: {
       [projectRoot]: {
+        implicitDependencies: dependencies,
         targets: {
           [lintTargetName]: lintTarget,
           [testTargetName]: testTarget,
           [buildTargetName]: buildTarget,
           [publishTargetName]: publishTarget,
+        },
+        release: {
+          version: {
+            versionActions: `${PLUGIN_NAME}:version`,
+          },
         },
       },
     },

@@ -1,5 +1,4 @@
 node_modules
-libs
 pyproject.toml
 !plugins/python/**/pyproject.toml
 uv.lock

@@ -25,4 +25,5 @@ Now you can run tests, lint, and build your library using the following commands
 ```bash
 nx test my-python-lib
 nx lint my-python-lib
+nx build my-python-lib
 ```
