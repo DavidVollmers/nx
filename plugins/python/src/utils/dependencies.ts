@@ -4,6 +4,7 @@ import { existsSync, readFileSync } from 'fs';
 import TOML from 'smol-toml';
 import { execSync, ExecSyncOptions } from 'child_process';
 import { DEFAULT_EXEC_OPTIONS } from '../constants';
+import { uvExecutor } from './uv';
 
 function checkDependencies(scope: any, regex: RegExp): boolean {
   if (!scope) {
@@ -41,9 +42,6 @@ export const dependencyExecutor: PromiseExecutor<{
     [dependency: string]: string;
   };
 }> = async (options, context) => {
-  const projectRoot =
-    context.projectsConfigurations.projects[context.projectName].root;
-
   const projectTomlPath = join(context.root, 'pyproject.toml');
   if (!existsSync(projectTomlPath)) {
     console.error(`Error: No pyproject.toml found at ${projectTomlPath}.`);
@@ -72,24 +70,10 @@ export const dependencyExecutor: PromiseExecutor<{
     };
   }
 
-  const execSyncOptions: ExecSyncOptions = {
-    ...DEFAULT_EXEC_OPTIONS,
-    cwd: join(context.root, projectRoot),
-  };
-
-  const command = 'uv run ' + options.commands[foundDependency];
-  try {
-    execSync(command, execSyncOptions);
-  } catch (error) {
-    if (!error.message.includes(command)) {
-      console.error('Error:', error.message);
-    }
-    return {
-      success: false,
-    };
-  }
-
-  return {
-    success: true,
-  };
+  return await uvExecutor(
+    {
+      command: 'run ' + options.commands[foundDependency],
+    },
+    context,
+  );
 };

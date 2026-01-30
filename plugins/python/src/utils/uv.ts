@@ -1,5 +1,5 @@
 import { execSync, type ExecSyncOptions } from 'child_process';
-import { Tree } from '@nx/devkit';
+import { PromiseExecutor, Tree } from '@nx/devkit';
 import { dirname, join } from 'path';
 import { DEFAULT_EXEC_OPTIONS } from '../constants';
 
@@ -30,3 +30,31 @@ export function addDependency(
     execSyncOptions,
   );
 }
+
+export const uvExecutor: PromiseExecutor<{
+  command: string;
+}> = async (options, context) => {
+  const projectRoot =
+    context.projectsConfigurations.projects[context.projectName].root;
+
+  const execSyncOptions: ExecSyncOptions = {
+    ...DEFAULT_EXEC_OPTIONS,
+    cwd: join(context.root, projectRoot),
+  };
+
+  const command = 'uv ' + options.command;
+  try {
+    execSync(command, execSyncOptions);
+  } catch (error) {
+    if (!error.message.includes(command)) {
+      console.error('Error:', error.message);
+    }
+    return {
+      success: false,
+    };
+  }
+
+  return {
+    success: true,
+  };
+};

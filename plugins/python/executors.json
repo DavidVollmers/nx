@@ -9,6 +9,16 @@
       "implementation": "./src/executors/test/test",
       "schema": "./src/executors/test/schema.json",
       "description": "test executor"
+    },
+    "build": {
+      "implementation": "./src/executors/build/build",
+      "schema": "./src/executors/build/schema.json",
+      "description": "build executor"
+    },
+    "publish": {
+      "implementation": "./src/executors/publish/publish",
+      "schema": "./src/executors/publish/schema.json",
+      "description": "publish executor"
     }
   }
 }
