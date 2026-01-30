@@ -12,6 +12,8 @@ import { readdirSync } from 'fs';
 export interface PythonPluginOptions {
   readonly lintTargetName?: string;
   readonly testTargetName?: string;
+  readonly buildTargetName?: string;
+  readonly publishTargetName?: string;
 }
 
 export const createNodesV2: CreateNodesV2<PythonPluginOptions> = [
@@ -56,12 +58,33 @@ async function createNodesInternal(
     ],
   };
 
+  const buildTargetName = options?.buildTargetName ?? 'build';
+  const buildTarget: TargetConfiguration = {
+    executor: `${PLUGIN_NAME}:build`,
+    outputs: [joinPathFragments('{projectRoot}', 'dist')],
+    dependsOn: [`^${buildTargetName}`],
+    cache: true,
+    inputs: [
+      joinPathFragments('{workspaceRoot}', 'pyproject.toml'),
+      joinPathFragments('{projectRoot}', 'pyproject.toml'),
+      joinPathFragments('{projectRoot}', '**', '*.py'),
+    ],
+  };
+
+  const publishTargetName = options?.publishTargetName ?? 'publish';
+  const publishTarget: TargetConfiguration = {
+    executor: `${PLUGIN_NAME}:publish`,
+    dependsOn: [`${buildTargetName}`],
+  };
+
   return {
     projects: {
       [projectRoot]: {
         targets: {
           [lintTargetName]: lintTarget,
           [testTargetName]: testTarget,
+          [buildTargetName]: buildTarget,
+          [publishTargetName]: publishTarget,
         },
       },
     },
