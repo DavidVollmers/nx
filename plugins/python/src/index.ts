@@ -91,7 +91,7 @@ async function createNodesInternal(
         },
         release: {
           version: {
-            versionActions: `${PLUGIN_NAME}:version`,
+            versionActions: `${PLUGIN_NAME}/src/release/version-actions`,
           },
         },
       },

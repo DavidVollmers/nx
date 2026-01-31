@@ -21,7 +21,7 @@
     }
   },
   "release": {
-    "projects": ["plugins/*"],
+    "projects": ["plugins/*", "test-projects/*"],
     "releaseTagPattern": "{version}",
     "projectsRelationship": "independent",
     "version": {
