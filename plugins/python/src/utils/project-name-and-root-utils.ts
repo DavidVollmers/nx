@@ -79,6 +79,11 @@ export async function determineProjectNameAndRootOptions(
   }
 
   const importPath = options.importPath ?? name;
+  if (!importPath.match(/^[a-zA-Z0-9_]+$/)) {
+    throw new Error(
+      `The importPath must be a valid Python package name (consisting of letters, numbers or underscores). Please use the --importPath option to provide a valid name.`,
+    );
+  }
 
   return {
     projectName: name,

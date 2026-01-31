@@ -33,5 +33,6 @@
     "git": {
       "commitMessage": "chore: release {version} [skip ci]"
     }
-  }
+  },
+  "plugins": ["@dev-tales/nx-python"]
 }

@@ -1,6 +1,4 @@
 node_modules
-pyproject.toml
-!plugins/python/**/pyproject.toml
 uv.lock
 .venv
 dist
@@ -11,3 +9,6 @@ dist
 .cursor/rules/nx-rules.mdc
 .github/instructions/nx.instructions.md
 vitest.config.*.timestamp* 
+
+__pycache__
+*.egg-info
