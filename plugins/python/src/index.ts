@@ -45,7 +45,7 @@ async function createNodesInternal(
   const lintTarget: TargetConfiguration = {
     executor: `${PLUGIN_NAME}:lint`,
     cache: true,
-    inputs: [joinPathFragments('{projectRoot}', '**', '*.py')],
+    inputs: [joinPathFragments('{defaultInputs}')],
   };
 
   const testTargetName = options?.testTargetName ?? 'test';
@@ -53,9 +53,8 @@ async function createNodesInternal(
     executor: `${PLUGIN_NAME}:test`,
     cache: true,
     inputs: [
+      joinPathFragments('{defaultInputs}'),
       joinPathFragments('{workspaceRoot}', 'pyproject.toml'),
-      joinPathFragments('{projectRoot}', 'pyproject.toml'),
-      joinPathFragments('{projectRoot}', '**', '*.py'),
     ],
   };
 
@@ -66,9 +65,8 @@ async function createNodesInternal(
     dependsOn: [`^${buildTargetName}`],
     cache: true,
     inputs: [
+      joinPathFragments('{defaultInputs}'),
       joinPathFragments('{workspaceRoot}', 'pyproject.toml'),
-      joinPathFragments('{projectRoot}', 'pyproject.toml'),
-      joinPathFragments('{projectRoot}', '**', '*.py'),
     ],
   };
 
