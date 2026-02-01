@@ -91,7 +91,8 @@ async function createNodesInternal(
         },
         release: {
           version: {
-            versionActions: `${PLUGIN_NAME}/src/release/version-actions`,
+            // TODO https://github.com/nrwl/nx/issues/34272
+            // versionActions: `${PLUGIN_NAME}/src/release/version-actions`,
           },
         },
       },
