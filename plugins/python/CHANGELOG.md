@@ -1,3 +1,13 @@
+## 0.3.0 (2026-02-01)
+
+### 🚀 Features
+
+- add build and publish target ([5c122ac](https://github.com/DavidVollmers/nx/commit/5c122ac))
+
+### ❤️ Thank You
+
+- dvolper
+
 ## 0.2.0 (2025-12-09)
 
 ### 🚀 Features
