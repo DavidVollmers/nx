@@ -4,7 +4,7 @@ import { uvExecutor } from '../../utils/uv';
 import { join } from 'path';
 
 const runExecutor: PromiseExecutor<BuildExecutorSchema> = async (
-  _,
+  args,
   context,
 ) => {
   const projectRoot =
@@ -13,6 +13,7 @@ const runExecutor: PromiseExecutor<BuildExecutorSchema> = async (
   return uvExecutor(
     {
       command: `build --out-dir "${outDir}"`,
+      additionalArgs: args.__unparsed__,
     },
     context,
   );

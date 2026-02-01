@@ -41,6 +41,7 @@ export const dependencyExecutor: PromiseExecutor<{
   commands: {
     [dependency: string]: string;
   };
+  additionalArgs?: string[];
 }> = async (options, context) => {
   const projectTomlPath = join(context.root, 'pyproject.toml');
   if (!existsSync(projectTomlPath)) {
@@ -73,6 +74,7 @@ export const dependencyExecutor: PromiseExecutor<{
   return await uvExecutor(
     {
       command: 'run ' + options.commands[foundDependency],
+      additionalArgs: options.additionalArgs,
     },
     context,
   );

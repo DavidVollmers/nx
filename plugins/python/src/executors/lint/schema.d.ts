@@ -1,1 +1,3 @@
-export interface LintExecutorSchema {} // eslint-disable-line
+export interface LintExecutorSchema {
+  readonly __unparsed__: string[];
+}

@@ -33,6 +33,7 @@ export function addDependency(
 
 export const uvExecutor: PromiseExecutor<{
   command: string;
+  additionalArgs?: string[];
 }> = async (options, context) => {
   const projectRoot =
     context.projectsConfigurations.projects[context.projectName].root;
@@ -42,11 +43,14 @@ export const uvExecutor: PromiseExecutor<{
     cwd: join(context.root, projectRoot),
   };
 
-  const command = 'uv ' + options.command;
+  let command = 'uv ' + options.command;
+  if (options.additionalArgs) {
+    command += ' ' + options.additionalArgs.join(' ');
+  }
   try {
     execSync(command, execSyncOptions);
   } catch (error) {
-    if (!error.message.includes(command)) {
+    if (!error.message.includes(options.command)) {
       console.error('Error:', error.message);
     }
     return {

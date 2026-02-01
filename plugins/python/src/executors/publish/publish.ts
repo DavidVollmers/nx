@@ -4,7 +4,7 @@ import { uvExecutor } from '../../utils/uv';
 import { join } from 'path';
 
 const runExecutor: PromiseExecutor<PublishExecutorSchema> = async (
-  _,
+  args,
   context,
 ) => {
   const projectRoot =
@@ -13,6 +13,7 @@ const runExecutor: PromiseExecutor<PublishExecutorSchema> = async (
   return uvExecutor(
     {
       command: `publish "${publishTarget}"`,
+      additionalArgs: args.__unparsed__,
     },
     context,
   );

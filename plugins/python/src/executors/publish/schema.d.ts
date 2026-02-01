@@ -1,1 +1,3 @@
-export interface PublishExecutorSchema {} // eslint-disable-line
+export interface PublishExecutorSchema {
+  readonly __unparsed__: string[];
+}
