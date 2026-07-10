@@ -38,5 +38,6 @@
       "pattern": "{version}"
     }
   },
-  "plugins": ["@dev-tales/nx-python"]
+  "plugins": ["@dev-tales/nx-python"],
+  "analytics": false
 }

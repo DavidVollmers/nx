@@ -46,6 +46,12 @@
       "options": {
         "reportsDirectory": "{projectRoot}/../../coverage/plugins/python"
       }
+    },
+    "nx-release-publish": {
+      "dependsOn": ["build", "^nx-release-publish"],
+      "options": {
+        "packageRoot": "dist/plugins/python"
+      }
     }
   }
 }
