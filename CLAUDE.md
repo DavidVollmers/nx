@@ -36,12 +36,20 @@ npx vitest run plugins/python/src/generators/lib/lib.spec.ts
 ```
 
 Targets for `python`-typed projects (e.g. `python-lib`, generated dynamically by the plugin's
-`createNodesV2` in `plugins/python/src/index.ts` from any `pyproject.toml` with a sibling
+`createNodes` in `plugins/python/src/index.ts` from any `pyproject.toml` with a sibling
 `project.json`): `lint`, `test`, `build`, `publish` (see Architecture below).
 
 Releases are handled by `nx release` (see `release` config in `nx.json`) — versioning uses
 conventional commits, tags are `{version}`, and projects release independently. Do not run release
-commands unless explicitly asked; it mutates changelogs, versions, and git tags/commits.
+commands unless explicitly asked; it mutates changelogs, versions, and git tags/commits, and
+`nx release publish` publishes to the public npm registry (requires an OTP: `nx release publish
+--otp=<code>`). Publishing is manual/local only — there is no CD workflow.
+
+`.github/workflows/ci.yml` runs `nx run-many -t build,lint,test` on every push to `main` and every
+PR (Node 22, `npm ci`, then `astral-sh/setup-uv` + `uv sync --all-packages --all-groups` before the
+Nx targets run). Note `astral-sh/setup-uv`'s cache must have `cache-dependency-glob:
+'**/pyproject.toml'` set explicitly — its default glob is `**/uv.lock`, which is gitignored here and
+would otherwise hard-error the action with "No file matched".
 
 Formatting is prettier via `lint-staged` (`*.*": "prettier --write"`), wired up through Husky
 (`pre-commit` runs `lint-staged`, `commit-msg` runs commitlint with `@commitlint/config-nx-scopes`,
@@ -53,7 +61,7 @@ Commits with a valid Nx project/workspace scope.
 ### Plugin registration (`plugins/python/src/index.ts`)
 
 The plugin is registered in `nx.json` (`"plugins": ["@dev-tales/nx-python"]`) and uses Nx's
-`createNodesV2` API to infer projects from `**/pyproject.toml` files. A `pyproject.toml` only becomes
+`createNodes` API to infer projects from `**/pyproject.toml` files. A `pyproject.toml` only becomes
 an Nx project if its directory also contains a `project.json` — otherwise it's ignored (this lets
 plain uv workspace members that aren't Nx projects coexist). For each qualifying directory it
 synthesizes four targets (`lint`, `test`, `build`, `publish`), each backed by a custom executor named
@@ -63,7 +71,12 @@ by the constant `PLUGIN_NAME` (`@dev-tales/nx-python`) from `plugins/python/src/
 
 - `init` — idempotently registers the plugin in `nx.json`, scaffolds a root `pyproject.toml` from
   `files/root/__tmp__pyproject.toml` (Nx template, `KeepExisting` strategy), and extends
-  `.gitignore` with Python-specific entries. Called automatically by `lib`.
+  `.gitignore` with Python-specific entries. Called automatically by `lib`. The templated
+  `[project].name` comes from the root `package.json`'s `name` field — but Nx also supports
+  workspaces with no root `package.json` at all (polyglot/non-JS setups), so this is guarded with
+  `tree.exists('package.json')` and falls back to `basename(tree.root)`, mirroring the same pattern
+  Nx's own `nx init`/`getNpmScope()` use internally. `extendGitignore` throws if `.gitignore` doesn't
+  exist yet — the generator does not create one from scratch, it only extends an existing file.
 - `lib` — the main generator. Runs `init` first, resolves the project name/root via
   `determineProjectNameAndRootOptions` (from `utils/project-name-and-root-utils.ts`), templates the
   library files (`files/lib` + optionally `files/<unitTestRunner>` e.g. `files/pytest`), and updates
@@ -106,11 +119,61 @@ version-actions API, but is currently _not_ wired up in `index.ts` (commented ou
 [nrwl/nx#34272](https://github.com/nrwl/nx/issues/34272) landing custom version actions support for
 inferred/plugin projects.
 
+`plugins/python/project.json` has an explicit `nx-release-publish` target
+(`dependsOn: ["build", "^nx-release-publish"]`, `options.packageRoot: "dist/plugins/python"`). This
+is required, not cosmetic: `@nx/js:release-publish`'s `packageRoot` defaults to the _project_ root
+when unset, which for this project is `plugins/python` — the raw TypeScript source, including
+`.spec.ts` files, `tsconfig.json`, and `vite.config.mts`, none of which should ever be published,
+and none of which matches `package.json`'s `"main": "./src/index.js"` (only `dist/plugins/python`
+has the compiled `.js`/`.d.ts`). If a new npm-publishable project is ever added to this workspace,
+give it the same explicit `nx-release-publish` target pointed at its own `dist/...` output.
+
+### Testing
+
+Vitest (`environment: 'node'` in `vite.config.mts`; the project is pure Node, no DOM). All 15
+`*.spec.ts` files under `plugins/python/src` are hermetic — no real `uv`/`flake8`/`pytest` process is
+ever spawned:
+
+- **Executors** mock `child_process.execSync` (and `fs.existsSync`/`readFileSync` for `lint`/`test`,
+  which go through `dependencyExecutor`'s `pyproject.toml` lookup) via `vi.hoisted()` + `vi.mock()`.
+  Use `plugins/python/src/testing/create-executor-context.ts`'s `createExecutorContext()` for a
+  valid `ExecutorContext` fixture (must include a `projectsConfigurations.projects[projectName]`
+  entry — the original Nx-generated stub specs omitted this and crashed on
+  `context.projectsConfigurations.projects[context.projectName].root`). That `testing/` folder is
+  excluded from the publishable build via `tsconfig.lib.json`.
+- **Generators and `Tree`-based utils** (`toml.ts`, `gitignore.ts`, `project-name-and-root-utils.ts`,
+  `generator-prompts.ts`) use `createTreeWithEmptyWorkspace()` from `@nx/devkit/testing` — a fully
+  in-memory `FsTree`, no `fs` mocking needed or wanted there. Two gotchas:
+  - It seeds a default `package.json` (`{ name: '@proj/source' }`) but **not** a `.gitignore` —
+    `init`/`lib` generator specs must `tree.write('.gitignore', ...)` in `beforeEach` or
+    `extendGitignore` throws.
+  - It sets `process.env.INIT_CWD` to the tree's workspace root as a side effect, which is what
+    makes `project-name-and-root-utils.ts`'s internal `getRelativeCwd()` call resolve
+    deterministically to `''` in tests — non-obvious, so `project-name-and-root-utils.spec.ts` calls
+    it out with a comment.
+- `formatFiles` and `normalizeDependencyOption`'s `promptWhenInteractive` are both safe to call
+  unmocked in tests: `formatFiles` degrades to a no-op if `prettier` can't be imported, and
+  `promptWhenInteractive` always short-circuits to its default value since `NX_INTERACTIVE` is never
+  set to `'true'` in the test environment (no real prompt / hang risk).
+- `lib.ts`'s post-generation tasks (`addDependency`/`sync`, wrapped by `runTasksInSerial`) are
+  deliberately never invoked by `lib.spec.ts` — only their _return shape_ is asserted
+  (`typeof result === 'function'` vs `undefined`), since actually calling them would shell out to
+  real `uv`. Note the `uv sync` task is queued unconditionally whenever not `--dryRun`, regardless of
+  `linter`/`unitTestRunner` — there's no "zero tasks queued" case outside of dry-run.
+
 ## Conventions
 
-- The workspace targets Python `>=3.13` (root `pyproject.toml`) and TypeScript is compiled with
-  `@nx/js:tsc` targeting `es2015`/`esnext` (see `tsconfig.base.json`); the plugin package itself is
-  published as CommonJS (`plugins/python/package.json` `"type": "commonjs"`).
+- The workspace targets Python `>=3.13` (root `pyproject.toml`) and Node `>=22` (root `package.json`
+  `engines`, required by Nx 23). TypeScript is compiled with `@nx/js:tsc` targeting `es2015`/`esnext`
+  (see `tsconfig.base.json`); the plugin package itself is published as CommonJS
+  (`plugins/python/package.json` `"type": "commonjs"`).
+- `plugins/python/tsconfig.spec.json` (which also covers `vite.config.mts`, since it's included
+  there for the `@nx/vitest` setup) overrides `module`/`moduleResolution` to `esnext`/`bundler`,
+  diverging from the CJS-flavored `tsconfig.json` it extends. This is required for Vite 8, whose
+  types are only exposed via conditional `package.json` exports that classic `moduleResolution:
+"node"` (used everywhere else, needed for the plugin's CJS build) cannot resolve. Safe to diverge
+  here because nothing in the real build/test pipeline ever runs `tsc` against
+  `tsconfig.spec.json` — Vitest transpiles via esbuild, not `tsc`.
 - Module boundaries are enforced via `@nx/enforce-module-boundaries` in `eslint.config.mjs` — every
   project currently has an open `sourceTag: '*'` / `onlyDependOnLibsWithTags: ['*']` constraint.
 - `.cursor/rules/nx-rules.mdc` and `.github/instructions/nx.instructions.md` are gitignored — they
