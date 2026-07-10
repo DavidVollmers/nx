@@ -4,6 +4,7 @@ vi.mock('@nx/devkit', async (importOriginal) => ({
   formatFiles: mockFormatFiles,
 }));
 
+import { basename } from 'path';
 import { createTreeWithEmptyWorkspace } from '@nx/devkit/testing';
 import { readJson, Tree } from '@nx/devkit';
 import { initGenerator } from './init';
@@ -55,6 +56,24 @@ describe('init generator', () => {
     const content = tree.read('pyproject.toml', 'utf-8');
     expect(content).toContain('name = "@proj/source"');
     expect(content).toContain(`classifiers = ["${PRIVATE_CLASSIFIER}"]`);
+  });
+
+  it('falls back to the workspace directory name when package.json is absent', async () => {
+    tree.delete('package.json');
+
+    await initGenerator(tree, { skipFormat: true });
+
+    const content = tree.read('pyproject.toml', 'utf-8');
+    expect(content).toContain(`name = "${basename(tree.root)}"`);
+  });
+
+  it('falls back to the workspace directory name when package.json has no name field', async () => {
+    tree.write('package.json', JSON.stringify({}));
+
+    await initGenerator(tree, { skipFormat: true });
+
+    const content = tree.read('pyproject.toml', 'utf-8');
+    expect(content).toContain(`name = "${basename(tree.root)}"`);
   });
 
   it('keeps an existing root pyproject.toml untouched', async () => {

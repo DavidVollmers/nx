@@ -9,7 +9,7 @@ import {
   readJson,
 } from '@nx/devkit';
 import { InitGeneratorSchema } from './schema';
-import { join } from 'path';
+import { basename, join } from 'path';
 import { PLUGIN_NAME, PRIVATE_CLASSIFIER } from '../../constants';
 import { extendGitignore } from '../../utils/gitignore';
 
@@ -28,13 +28,16 @@ function createFiles(tree: Tree) {
   }
   updateNxJson(tree, nxJson);
 
-  const rootPackageJson = readJson(tree, 'package.json');
+  const packageJson = tree.exists('package.json')
+    ? readJson(tree, 'package.json')
+    : null;
+  const name = packageJson?.name ?? basename(tree.root);
   generateFiles(
     tree,
     join(__dirname, 'files/root'),
     '.',
     {
-      name: rootPackageJson.name,
+      name,
       classifiers: JSON.stringify(PRIVATE_CLASSIFIER),
       tmp: '',
     },

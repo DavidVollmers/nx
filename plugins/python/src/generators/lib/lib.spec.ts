@@ -37,6 +37,18 @@ describe('lib generator', () => {
     expect(tree.read('.gitignore', 'utf-8')).toContain('.venv');
   });
 
+  it('completes successfully in a workspace without a root package.json', async () => {
+    tree.delete('package.json');
+
+    await libGenerator(tree, options);
+
+    expect(readProjectConfiguration(tree, 'test_lib').root).toBe(
+      'libs/test_lib',
+    );
+    expect(tree.exists('libs/test_lib/pyproject.toml')).toBe(true);
+    expect(tree.exists('pyproject.toml')).toBe(true);
+  });
+
   it('generates the library source files', async () => {
     await libGenerator(tree, options);
 
