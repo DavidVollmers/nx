@@ -1,3 +1,14 @@
+## 0.3.1 (2026-07-10)
+
+### 🩹 Fixes
+
+- **python:** support Nx workspaces without a root package.json ([772edb5](https://github.com/DavidVollmers/nx/commit/772edb5))
+
+### ❤️ Thank You
+
+- Claude Sonnet 5
+- dvolper
+
 ## 0.3.0 (2026-02-01)
 
 ### 🚀 Features
