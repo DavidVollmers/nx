@@ -1,4 +1,6 @@
-function readGitignore(tree: any, path: string): string[] {
+import { Tree } from '@nx/devkit';
+
+function readGitignore(tree: Tree, path: string): string[] {
   if (!tree.exists(path)) {
     throw new Error(`Cannot find ${path}`);
   }
@@ -13,7 +15,7 @@ function readGitignore(tree: any, path: string): string[] {
   }
 }
 
-export function extendGitignore(tree: any, path: string, entries: string[]) {
+export function extendGitignore(tree: Tree, path: string, entries: string[]) {
   const existingEntries = readGitignore(tree, path);
   const newEntries = entries.filter(
     (entry) => !existingEntries.includes(entry),

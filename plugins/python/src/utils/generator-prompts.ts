@@ -1,7 +1,7 @@
 import { Tree } from '@nx/devkit';
 import { readToml } from './toml';
 import { doesDependencyExist } from './dependencies';
-import { promptWhenInteractive } from '@nx/devkit/src/generators/prompt';
+import { promptWhenInteractive } from '@nx/devkit/internal';
 
 export async function normalizeDependencyOption<T extends string>(
   tree: Tree,
@@ -9,7 +9,7 @@ export async function normalizeDependencyOption<T extends string>(
   initialValue: T | undefined,
   choices: readonly T[],
   defaultValue: T,
-  message: string = `Which ${name} would you like to use?`,
+  message = `Which ${name} would you like to use?`,
 ): Promise<T> {
   if (initialValue) {
     return initialValue;

@@ -8,8 +8,10 @@ import {
   Tree,
 } from '@nx/devkit';
 import { LibGeneratorSchema } from './schema';
-import { determineProjectNameAndRootOptions } from '../../utils/project-name-and-root-utils';
-import { ProjectNameAndRootOptions } from '@nx/devkit/src/generators/project-name-and-root-utils';
+import {
+  determineProjectNameAndRootOptions,
+  ProjectNameAndRootOptions,
+} from '../../utils/project-name-and-root-utils';
 import { join } from 'path';
 import { updateToml } from '../../utils/toml';
 import { addDependency, sync } from '../../utils/uv';

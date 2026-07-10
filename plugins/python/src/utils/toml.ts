@@ -3,6 +3,9 @@ import TOML from 'smol-toml';
 
 // https://github.com/nrwl/nx/blob/60d019e0c72cfc8d6fc071af8cdb23af9056faef/packages/nx/src/generators/utils/json.ts#L1
 
+// Callers freely traverse and mutate arbitrary nested TOML paths, so the
+// default type can't be tightened beyond `object` without breaking them.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function readToml<T extends object = any>(tree: Tree, path: string): T {
   if (!tree.exists(path)) {
     throw new Error(`Cannot find ${path}`);
@@ -23,6 +26,7 @@ export function writeToml<T extends object = object>(
   tree.write(path, `${serialized}\n`);
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function updateToml<T extends object = any, U extends object = T>(
   tree: Tree,
   path: string,

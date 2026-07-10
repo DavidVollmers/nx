@@ -1,7 +1,7 @@
 import {
-  CreateNodesContextV2,
+  CreateNodesContext,
   createNodesFromFiles,
-  CreateNodesV2,
+  CreateNodes,
 } from 'nx/src/project-graph/plugins';
 import { dirname, join } from 'path';
 import { TargetConfiguration } from 'nx/src/config/workspace-json-project-json';
@@ -17,7 +17,7 @@ export interface PythonPluginOptions {
   readonly publishTargetName?: string;
 }
 
-export const createNodesV2: CreateNodesV2<PythonPluginOptions> = [
+export const createNodes: CreateNodes<PythonPluginOptions> = [
   '**/pyproject.toml',
   async (configFiles, options, context) => {
     return await createNodesFromFiles(
@@ -33,7 +33,7 @@ export const createNodesV2: CreateNodesV2<PythonPluginOptions> = [
 async function createNodesInternal(
   configFilePath: string,
   options: PythonPluginOptions | undefined,
-  context: CreateNodesContextV2,
+  context: CreateNodesContext,
 ): Promise<CreateNodesResult> {
   const projectRoot = dirname(configFilePath);
 

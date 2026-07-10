@@ -4,11 +4,25 @@ import {
   Tree,
   workspaceRoot,
 } from '@nx/devkit';
-import {
-  ProjectGenerationOptions,
-  ProjectNameAndRootOptions,
-} from '@nx/devkit/src/generators/project-name-and-root-utils';
-import { getRelativeCwd } from '@nx/devkit/src/generators/artifact-name-and-directory-utils';
+import { getRelativeCwd } from '@nx/devkit/internal';
+
+export type ProjectGenerationOptions = {
+  directory: string;
+  name?: string;
+  projectType: 'application' | 'library';
+  importPath?: string;
+  rootProject?: boolean;
+};
+
+export type ProjectNameAndRootOptions = {
+  projectName: string;
+  projectRoot: string;
+  names: {
+    projectFileName: string;
+    projectSimpleName: string;
+  };
+  importPath: string;
+};
 
 function validateOptions(
   providedName: string,

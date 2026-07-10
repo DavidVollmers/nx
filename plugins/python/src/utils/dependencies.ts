@@ -2,20 +2,28 @@ import { PromiseExecutor } from '@nx/devkit';
 import { join } from 'path';
 import { existsSync, readFileSync } from 'fs';
 import TOML from 'smol-toml';
-import { execSync, ExecSyncOptions } from 'child_process';
-import { DEFAULT_EXEC_OPTIONS } from '../constants';
 import { uvExecutor } from './uv';
 
-function checkDependencies(scope: any, regex: RegExp): boolean {
+interface PyProjectToml {
+  project?: {
+    dependencies?: string[];
+  };
+  'dependency-groups'?: Record<string, string[]>;
+}
+
+function checkDependencies(
+  scope: string[] | undefined,
+  regex: RegExp,
+): boolean {
   if (!scope) {
     return false;
   }
 
-  return scope.some((dep: string) => regex.test(dep));
+  return scope.some((dep) => regex.test(dep));
 }
 
 export function doesDependencyExist(
-  toml: any,
+  toml: PyProjectToml,
   dependencyName: string,
 ): boolean {
   const regex = new RegExp(`^${dependencyName}([\\s<>=!~].*)?$`, 'i');

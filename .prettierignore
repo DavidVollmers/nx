@@ -4,3 +4,5 @@
 *.iml
 *.toml
 *.py
+
+.nx/self-healing

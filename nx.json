@@ -10,9 +10,11 @@
       "cache": true,
       "inputs": [
         "default",
+        "^default",
         "{workspaceRoot}/.eslintrc.json",
         "{workspaceRoot}/.eslintignore",
-        "{workspaceRoot}/eslint.config.mjs"
+        "{workspaceRoot}/eslint.config.mjs",
+        "{workspaceRoot}/tools/eslint-rules/**/*"
       ]
     },
     "@nx/vitest:test": {
@@ -22,7 +24,6 @@
   },
   "release": {
     "projects": ["plugins/*", "test-projects/*"],
-    "releaseTagPattern": "{version}",
     "projectsRelationship": "independent",
     "version": {
       "conventionalCommits": true
@@ -32,6 +33,9 @@
     },
     "git": {
       "commitMessage": "chore: release {version} [skip ci]"
+    },
+    "releaseTag": {
+      "pattern": "{version}"
     }
   },
   "plugins": ["@dev-tales/nx-python"]
