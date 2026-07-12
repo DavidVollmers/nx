@@ -1,3 +1,18 @@
+## 0.3.2 (2026-07-12)
+
+### 🚀 Features
+
+- **python:** add app generator with optional FastAPI setup ([21b0d9d](https://github.com/DavidVollmers/nx/commit/21b0d9d))
+
+### 🩹 Fixes
+
+- **python:** publish compiled dist output instead of raw source ([9e963ab](https://github.com/DavidVollmers/nx/commit/9e963ab))
+
+### ❤️ Thank You
+
+- Claude Sonnet 5
+- dvolper
+
 ## 0.3.1 (2026-07-10)
 
 ### 🩹 Fixes
