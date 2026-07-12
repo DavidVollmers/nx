@@ -23,7 +23,7 @@
     }
   },
   "release": {
-    "projects": ["plugins/*", "test-projects/*"],
+    "projects": ["plugins/*"],
     "projectsRelationship": "independent",
     "version": {
       "conventionalCommits": true
