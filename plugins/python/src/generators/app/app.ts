@@ -7,7 +7,7 @@ import {
   runTasksInSerial,
   Tree,
 } from '@nx/devkit';
-import { LibGeneratorSchema } from './schema';
+import { AppGeneratorSchema } from './schema';
 import {
   determineProjectNameAndRootOptions,
   ProjectNameAndRootOptions,
@@ -16,28 +16,31 @@ import { join } from 'path';
 import { registerWorkspaceMember } from '../../utils/toml';
 import { addDependency, sync } from '../../utils/uv';
 import initGenerator from '../init/init';
-import { PRIVATE_CLASSIFIER } from '../../constants';
+import { PLUGIN_NAME, PRIVATE_CLASSIFIER } from '../../constants';
 import { normalizeLinterOption } from '../../utils/linter';
 import {
   normalizeUnitTestRunnerOption,
   UnitTestRunner,
 } from '../../utils/unit-test-runner';
+import { Framework, normalizeFrameworkOption } from '../../utils/framework';
 
 function createFiles(
   tree: Tree,
   options: ProjectNameAndRootOptions,
   publishable: boolean,
+  framework: Framework,
   unitTestRunner: UnitTestRunner,
 ) {
   generateFiles(
     tree,
-    join(__dirname, 'files/lib'),
+    join(__dirname, 'files/app'),
     options.projectRoot,
     {
       name: options.projectName,
-      description: 'My awesome Python library',
+      description: 'My awesome Python application',
       classifiers: !publishable ? JSON.stringify(PRIVATE_CLASSIFIER) : '',
-      module: options.importPath,
+      framework,
+      unitTestRunner,
       tmp: '',
     },
     {
@@ -52,7 +55,7 @@ function createFiles(
       options.projectRoot,
       {
         name: options.projectName,
-        module: options.importPath,
+        framework,
       },
     );
   }
@@ -60,28 +63,43 @@ function createFiles(
   registerWorkspaceMember(tree, options.projectName, options.projectRoot);
 }
 
-export async function libGenerator(tree: Tree, options: LibGeneratorSchema) {
+export async function appGenerator(tree: Tree, options: AppGeneratorSchema) {
   await initGenerator(tree, { skipFormat: true });
 
   const result = await determineProjectNameAndRootOptions(tree, {
     name: options.name,
-    projectType: 'library',
+    projectType: 'application',
     directory: options.directory,
-    importPath: options.importPath,
+    // Applications have no import-path concept (flat main.py, nothing imports
+    // them as a package), but determineProjectNameAndRootOptions always
+    // derives and validates one from the project name, which would otherwise
+    // reject perfectly valid hyphenated app names/directories. This
+    // placeholder is never read anywhere below.
+    importPath: 'app',
   });
+  const framework = await normalizeFrameworkOption(tree, options.framework);
   const linter = await normalizeLinterOption(tree, options.linter);
   const unitTestRunner = await normalizeUnitTestRunnerOption(
     tree,
     options.unitTestRunner,
   );
 
-  createFiles(tree, result, !!options.publishable, unitTestRunner);
+  createFiles(tree, result, !!options.publishable, framework, unitTestRunner);
 
   // TODO handle dry run properly (https://github.com/nrwl/nx/discussions/33731)
   const dryRun =
     process.argv.includes('--dryRun') || process.argv.includes('-d');
   const tasks = [];
   if (!dryRun) {
+    if (framework === 'fastapi') {
+      tasks.push(() =>
+        addDependency(
+          tree,
+          `${result.projectRoot}/pyproject.toml`,
+          'fastapi[standard]',
+        ),
+      );
+    }
     if (linter && linter !== 'none') {
       tasks.push(() => addDependency(tree, 'pyproject.toml', linter, 'dev'));
     }
@@ -93,10 +111,19 @@ export async function libGenerator(tree: Tree, options: LibGeneratorSchema) {
     tasks.push(() => sync(tree));
   }
 
+  const command =
+    framework === 'fastapi' ? 'fastapi dev main.py' : 'python main.py';
   const projectConfiguration: ProjectConfiguration = {
     root: result.projectRoot,
-    projectType: 'library',
-    targets: {},
+    projectType: 'application',
+    targets: {
+      serve: {
+        executor: `${PLUGIN_NAME}:serve`,
+        options: {
+          command,
+        },
+      },
+    },
     tags: [],
   };
 
@@ -108,4 +135,4 @@ export async function libGenerator(tree: Tree, options: LibGeneratorSchema) {
   return runTasksInSerial(...tasks);
 }
 
-export default libGenerator;
+export default appGenerator;

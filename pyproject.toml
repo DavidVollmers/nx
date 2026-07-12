@@ -3,12 +3,15 @@ name = "nx"
 version = "0.0.0"
 classifiers = [ "Private :: Do Not Upload" ]
 requires-python = ">=3.13"
-dependencies = [ "python-lib" ]
+dependencies = [ "python-lib", "python-app" ]
 
 [tool.uv.workspace]
-members = [ "test-projects/python-lib" ]
+members = [ "test-projects/python-lib", "test-projects/python-app" ]
 
 [tool.uv.sources.python-lib]
+workspace = true
+
+[tool.uv.sources.python-app]
 workspace = true
 
 [dependency-groups]
@@ -16,4 +19,3 @@ dev = [
     "flake8>=7.3.0",
     "pytest>=9.0.2",
 ]
-

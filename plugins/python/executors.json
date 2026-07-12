@@ -19,6 +19,11 @@
       "implementation": "./src/executors/publish/publish",
       "schema": "./src/executors/publish/schema.json",
       "description": "publish executor"
+    },
+    "serve": {
+      "implementation": "./src/executors/serve/serve",
+      "schema": "./src/executors/serve/schema.json",
+      "description": "serve executor"
     }
   }
 }

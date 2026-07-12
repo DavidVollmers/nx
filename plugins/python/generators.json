@@ -5,6 +5,11 @@
       "schema": "./src/generators/lib/schema.json",
       "description": "lib generator"
     },
+    "app": {
+      "factory": "./src/generators/app/app",
+      "schema": "./src/generators/app/schema.json",
+      "description": "app generator"
+    },
     "init": {
       "factory": "./src/generators/init/init",
       "schema": "./src/generators/init/schema.json",

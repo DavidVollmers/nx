@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/schema",
+  "version": 2,
+  "title": "Serve executor",
+  "description": "",
+  "type": "object",
+  "properties": {
+    "command": {
+      "type": "string",
+      "description": "The command to run to serve the application."
+    },
+    "__unparsed__": {
+      "hidden": true,
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "$default": {
+        "$source": "unparsed"
+      },
+      "x-priority": "internal"
+    }
+  },
+  "required": ["command"]
+}

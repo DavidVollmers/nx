@@ -55,7 +55,7 @@ describe('addDependency', () => {
     addDependency(tree, 'libs/app/pyproject.toml', 'flake8');
 
     expect(mockExecSync).toHaveBeenCalledWith(
-      'uv add flake8  --no-sync',
+      'uv add "flake8"  --no-sync',
       expect.objectContaining({ cwd: join(tree.root, 'libs/app') }),
     );
   });
@@ -66,8 +66,19 @@ describe('addDependency', () => {
     addDependency(tree, 'libs/app/pyproject.toml', 'flake8', 'dev');
 
     expect(mockExecSync).toHaveBeenCalledWith(
-      'uv add flake8 --group dev --no-sync',
+      'uv add "flake8" --group dev --no-sync',
       expect.objectContaining({ cwd: join(tree.root, 'libs/app') }),
+    );
+  });
+
+  it('quotes the package name so extras syntax (e.g. fastapi[standard]) is shell-safe', () => {
+    tree.write('libs/app/pyproject.toml', '[project]\nname = "app"\n');
+
+    addDependency(tree, 'libs/app/pyproject.toml', 'fastapi[standard]');
+
+    expect(mockExecSync).toHaveBeenCalledWith(
+      'uv add "fastapi[standard]"  --no-sync',
+      expect.anything(),
     );
   });
 

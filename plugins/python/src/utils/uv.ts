@@ -26,7 +26,7 @@ export function addDependency(
   };
   const groupArg = groupName ? ['--group', groupName] : [];
   execSync(
-    `uv add ${packageName} ${groupArg.join(' ')} --no-sync`,
+    `uv add "${packageName}" ${groupArg.join(' ')} --no-sync`,
     execSyncOptions,
   );
 }

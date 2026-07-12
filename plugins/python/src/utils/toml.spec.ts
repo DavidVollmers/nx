@@ -1,6 +1,11 @@
 import { createTreeWithEmptyWorkspace } from '@nx/devkit/testing';
 import { Tree } from '@nx/devkit';
-import { readToml, updateToml, writeToml } from './toml';
+import {
+  readToml,
+  registerWorkspaceMember,
+  updateToml,
+  writeToml,
+} from './toml';
 
 describe('readToml', () => {
   let tree: Tree;
@@ -89,5 +94,54 @@ describe('updateToml', () => {
     expect(readToml(tree, 'pyproject.toml')).toEqual({
       project: { name: 'app', dependencies: ['flake8'] },
     });
+  });
+});
+
+describe('registerWorkspaceMember', () => {
+  let tree: Tree;
+
+  beforeEach(() => {
+    tree = createTreeWithEmptyWorkspace();
+    tree.write(
+      'pyproject.toml',
+      '[project]\nname = "root"\ndependencies = []\n',
+    );
+  });
+
+  it('adds the project to the root dependencies, workspace members and sources', () => {
+    registerWorkspaceMember(tree, 'my_lib', 'libs/my_lib');
+
+    expect(readToml(tree, 'pyproject.toml')).toEqual({
+      project: { name: 'root', dependencies: ['my_lib'] },
+      tool: {
+        uv: {
+          workspace: { members: ['libs/my_lib'] },
+          sources: { my_lib: { workspace: true } },
+        },
+      },
+    });
+  });
+
+  it('does not duplicate an already-registered project', () => {
+    registerWorkspaceMember(tree, 'my_lib', 'libs/my_lib');
+
+    registerWorkspaceMember(tree, 'my_lib', 'libs/my_lib');
+
+    const toml = readToml(tree, 'pyproject.toml');
+    expect(toml.project.dependencies).toEqual(['my_lib']);
+    expect(toml.tool.uv.workspace.members).toEqual(['libs/my_lib']);
+  });
+
+  it('registers additional projects alongside existing ones', () => {
+    registerWorkspaceMember(tree, 'my_lib', 'libs/my_lib');
+
+    registerWorkspaceMember(tree, 'other_lib', 'libs/other_lib');
+
+    const toml = readToml(tree, 'pyproject.toml');
+    expect(toml.project.dependencies).toEqual(['my_lib', 'other_lib']);
+    expect(toml.tool.uv.workspace.members).toEqual([
+      'libs/my_lib',
+      'libs/other_lib',
+    ]);
   });
 });

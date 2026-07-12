@@ -1,0 +1,12 @@
+[project]
+name = "<%= name %>"
+version = "0.0.0"
+description = "<%= description %>"<% if (classifiers.length) { %>
+classifiers = [<%- classifiers %>]<% } %>
+requires-python = ">=3.13"
+dependencies = []
+<% if (unitTestRunner === 'pytest') { -%>
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+<% } -%>

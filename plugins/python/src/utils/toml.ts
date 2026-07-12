@@ -35,3 +35,29 @@ export function updateToml<T extends object = any, U extends object = T>(
   const updatedValue = updater(readToml<T>(tree, path));
   writeToml<U>(tree, path, updatedValue);
 }
+
+export function registerWorkspaceMember(
+  tree: Tree,
+  projectName: string,
+  projectRoot: string,
+) {
+  updateToml(tree, 'pyproject.toml', (toml) => {
+    if (!toml.project.dependencies) toml.project.dependencies = [];
+    if (!toml.project.dependencies.includes(projectName)) {
+      toml.project.dependencies.push(projectName);
+    }
+    if (!toml.tool) toml.tool = {};
+    const tool = toml.tool;
+    if (!tool.uv) tool.uv = {};
+    const uv = tool.uv;
+    if (!uv.workspace) uv.workspace = {};
+    if (!uv.workspace.members) uv.workspace.members = [];
+    if (!uv.workspace.members.includes(projectRoot)) {
+      uv.workspace.members.push(projectRoot);
+    }
+    if (!uv.sources) uv.sources = {};
+    if (!uv.sources[projectName]) uv.sources[projectName] = {};
+    uv.sources[projectName].workspace = true;
+    return toml;
+  });
+}

@@ -1,0 +1,10 @@
+[project]
+name = "python-app"
+version = "0.0.0"
+description = "My awesome Python application"
+classifiers = ["Private :: Do Not Upload"]
+requires-python = ">=3.13"
+dependencies = []
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
